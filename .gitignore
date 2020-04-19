@@ -1,0 +1,7 @@
+assets/node_modules
+assets/dist
+.vs
+build
+*.dir
+res
+*proj*

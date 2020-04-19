@@ -1,0 +1,32 @@
+{
+  "name": "material",
+  "version": "1.0.0",
+  "description": "Material UI for Tracker",
+  "main": "webpack.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server",
+    "build": "webpack && copy /Y app.html dist\\app.html & copy /Y my.js dist\\my.js & copy /Y dist\\* D:\\CEF\\cef-project\\build\\tracker\\Debug\\assets & copy /Y styles.css dist\\styles.css"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "autoprefixer": "^9.7.6",
+    "babel-loader": "^8.1.0",
+    "css-loader": "^3.5.2",
+    "extract-loader": "^5.0.1",
+    "file-loader": "^6.0.0",
+    "postcss-loader": "^3.0.0",
+    "sass": "^1.26.3",
+    "sass-loader": "^8.0.2",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "@material/button": "^5.1.0",
+    "material-components-web": "^5.1.0"
+  }
+}

@@ -1,0 +1,90 @@
+html, body {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32px;
+  background-color: rgb(14, 13, 13);
+}
+
+.mdc-data-table__row
+{
+    text-align: center;
+}
+
+.item_name {
+    margin: auto
+}
+
+.mdc-data-table__table{
+    display:block;
+    overflow-y: auto;
+    height:450px;
+}
+
+/*
+body{
+    overflow: overlay;
+}
+
+thead, tbody {
+     display: grid; 
+}
+
+tbody {
+    height: 380px;       
+    width: 100%;
+    overflow-y: auto;    
+    overflow-x: hidden;  
+}*/
+
+
+
+.trade-item-icon-large,.trade-item-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #000;
+    border-width: 3px;
+    border-style: solid;
+    border-radius: 3px
+}
+
+.trade-item-icon-large {
+    width: 80px;
+    height: 80px
+}
+
+.item-quality-legendary {
+    color: #e6bc16
+}
+
+.item-quality-none {
+    color: #000
+}
+
+.item-quality-normal {
+    color: #c8c8c8
+}
+
+.item-quality-fine {
+    color: #3c3
+}
+
+.item-quality-superior {
+    color: #06f
+}
+
+.item-quality-epic {
+    color: #c0f
+}
+
+.item-quality-legendary {
+    color: #e6bc16
+}
+
+.item-quality-none,.item-quality-normal,.item-quality-fine,.item-quality-superior,.item-quality-epic,.item-quality-legendary {
+    font-weight: bold
+}
+
+.small-icon {
+    height: 25px;
+    width: 25px;
+}
