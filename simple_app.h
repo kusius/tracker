@@ -37,7 +37,6 @@ class SimpleApp : public CefApp,
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(SimpleApp);
   CefRefPtr<CefV8Handler> V8Handler;
-  CefRefPtr<CefV8Value> ttc_price_check;  // native JS function call
 };
 
 #endif  // CEF_TESTS_CEFSIMPLE_SIMPLE_APP_H_

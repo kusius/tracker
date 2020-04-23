@@ -1,28 +1,47 @@
-#pragma once
-#include <map>
-#include <string>
+#ifndef DATASTORE_H_
+#define DATASTORE_H_
 
+#include <map>
+#include <mutex>
+#include <string>
+#include <vector>
+
+#include "include/base/cef_logging.h"
 struct PriceCheck {
   std::string name;
-  std::string inner_html;
   std::string img_src;
   double min_suggest, max_suggest;
   bool is_watched;
 };
 
+struct ItemDeal {
+  std::string name;
+  std::string location;
+  std::string trader;
+  unsigned int mins_elapsed;
+  double price;
+};
+
+typedef std::vector<ItemDeal> ItemDealVec;
+
 class DataStore {
  public:
-  static std::map<std::string, PriceCheck> items;
-
-  static DataStore& getInstance() {
+  static DataStore* getInstance() {
     static DataStore instance;
-    return instance;
+    return &instance;
   }
   static bool AddItem(PriceCheck item);
+  static bool RemoveItem(std::string& key);
+  static PriceCheck GetItem(std::string& key);
+  std::map<std::string, PriceCheck> GetItemsSnapshot();
   static void Clear();
 
  private:
-  DataStore() {}
+  static std::map<std::string, PriceCheck> items;
+  static std::recursive_mutex m_;
+  DataStore(){};
   DataStore(DataStore const&);
   void operator=(DataStore const&);
 };
+
+#endif

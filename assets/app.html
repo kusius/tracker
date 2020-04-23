@@ -9,7 +9,6 @@
 </head>
 
 <body>
-
     <div class="mdc-layout-grid">
         <div class="mdc-layout-grid__inner">
             <div class="mdc-layout-grid__cell">
@@ -22,6 +21,8 @@
                         <div class="mdc-line-ripple"></div>
                     </label>
                 </form>
+                <div id="notifylist" class="container">
+                </div>
             </div>
             <div class="mdc-layout-grid__cell">
                 <div class="mdc-data-table mdc-elevation--z1">
@@ -51,34 +52,49 @@
                 </div>
             </div>
         </div>
-    </div>
 
+        <!-- The context menu to take actions on items of the watchlist-->
+        <div class="mdc-menu mdc-menu-surface">
+            <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical" tabindex="-1">
+                <li class="mdc-list-item" role="menuitem" onclick="window.GlobalFuncs.RemoveItem(event);">
+                    <span class="mdc-list-item__text">Remove</span>
+                </li>
 
-    <!-- The context menu to take actions on items of the watchlist-->
-    <div class="mdc-menu mdc-menu-surface">
-        <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical" tabindex="-1">
-            <li class="mdc-list-item" role="menuitem" onclick="window.GlobalFuncs.RemoveItem(event);">
-                <span class="mdc-list-item__text">Remove</span>
-            </li>
+            </ul>
+        </div>
 
-        </ul>
-    </div>
-
-    <!-- A template row to dynamically fill the watchlist table via JS-->
-    <template id="itemrow">
-        <tr class="mdc-data-table__row mdc-menu-surface--anchor"
-            onmousedown="return window.GlobalFuncs.menuhandle(event);">
-            <td class="mdc-data-table__cell item_name">
-                <img>
-                <div></div>
-            </td>
-            <td class="mdc-data-table__cell mdc-data-table__cell--numeric item_min_suggest"></td>
-            <td class="mdc-data-table__cell mdc-data-table__cell--numeric item_max_suggest"></td>
-        </tr>
-    </template>
-
-    <!-- sample row for watchlist table
-        <tr class="mdc-data-table__row mdc-menu-surface--anchor">
+        <!--A template list item to notify user of deals-->
+        <template id="notifyitem">
+            <div class="mdc-card demo-card">
+                <div class="mdc-card__primary-action demo-card__primary-action mdc-ripple-upgraded" tabindex="0"
+                    style="--mdc-ripple-fg-size:210px; --mdc-ripple-fg-scale:1.83226; --mdc-ripple-fg-translate-start:144.5px, -11.0625px; --mdc-ripple-fg-translate-end:70px, -38px;">
+                    <div class="demo-card__primary">
+                        <h2 id="itemname" class="demo-card__title mdc-typography mdc-typography--headline6">Kuta
+                        </h2>
+                        <h3 id="itemmeta" class="demo-card__subtitle mdc-typography mdc-typography--subtitle2">
+                            <img class="small-icon" src="content/icons/gold.png"></h3>
+                    </div>
+                    <div id="itemlocation" class="demo-card__secondary mdc-typography mdc-typography--body2">Deshaan:
+                        Mournhold -
+                        Golden Clover Guild</div>
+                </div>
+            </div>
+        </template>
+        <!-- A template row for the watchlist-->
+        <template id="itemrow">
+            <tr class="mdc-data-table__row mdc-menu-surface--anchor"
+                onmousedown="return window.GlobalFuncs.menuhandle(event);">
+                <td class="mdc-data-table__cell item_name">
+                    <img>
+                    <div></div>
+                </td>
+                <td class="mdc-data-table__cell mdc-data-table__cell--numeric item_min_suggest"></td>
+                <td class="mdc-data-table__cell mdc-data-table__cell--numeric item_max_suggest"></td>
+            </tr>
+        </template>
+        <!-- sample row for watchlist table-->
+        <!--
+            <tr class="mdc-data-table__row mdc-menu-surface--anchor">
                                 <td class="mdc-data-table__cell item_name">
                                     <img
                                         src="https://eu.tamrieltradecentre.com/Content/icons/crafting_components_runestones_054.png">
@@ -91,7 +107,8 @@
                             </tr>
     -->
 
-    <script src="bundle.js" async></script>
+        <script src="bundle.js" async></script>
+
 
 </body>
 

@@ -6,14 +6,18 @@
 
 #include <string>
 
+#include "datastore.h"
 #include "helpers_win.h"
+#include "include/base/cef_bind.h"
 #include "include/base/cef_logging.h"
 #include "include/cef_browser.h"
 #include "include/cef_command_line.h"
 #include "include/views/cef_browser_view.h"
 #include "include/views/cef_window.h"
+#include "include/wrapper/cef_closure_task.h"
 #include "include/wrapper/cef_helpers.h"
 #include "simple_handler.h"
+#include "update_handler.h"
 #include "v8_handler.h"
 
 namespace {
@@ -47,7 +51,7 @@ class SimpleWindowDelegate : public CefWindowDelegate {
   }
 
   CefSize GetPreferredSize(CefRefPtr<CefView> view) OVERRIDE {
-    return CefSize(800, 600);
+    return CefSize(800, 800);
   }
 
  private:
@@ -81,7 +85,6 @@ class SimpleBrowserViewDelegate : public CefBrowserViewDelegate {
 }  // namespace
 
 SimpleApp::SimpleApp() {}
-
 // CefRenderProcessHandler implementation
 void SimpleApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                  CefRefPtr<CefFrame> frame,
@@ -92,18 +95,25 @@ void SimpleApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
   // Create an instance of my CefV8Handler object.
   CefRefPtr<CefV8Handler> handler = new MyV8Handler();
 
-  // Create the function.
   CefRefPtr<CefV8Value> func =
       CefV8Value::CreateFunction("ttc_price_check", handler);
-  // Add the function to the "window" object.
   object->SetValue("ttc_price_check", func, V8_PROPERTY_ATTRIBUTE_NONE);
-  // Create the function.
+
   func = CefV8Value::CreateFunction("confirm_watched_item", handler);
-  // Add the function to the "window" object.
   object->SetValue("confirm_watched_item", func, V8_PROPERTY_ATTRIBUTE_NONE);
+
   func = CefV8Value::CreateFunction("remove_watched_item", handler);
-  // Add the function to the "window" object.
   object->SetValue("remove_watched_item", func, V8_PROPERTY_ATTRIBUTE_NONE);
+  // Register our search function to execute after a delay on the render thread
+  // Repost ourselves for the next update
+  CefRefPtr<UpdateHandler> instance = new UpdateHandler();
+  func = CefV8Value::CreateFunction("register", instance);
+  object->SetValue("register", func, V8_PROPERTY_ATTRIBUTE_NONE);
+
+  // CefRefPtr<CefV8Handler> instance = new UpdateHandler();
+  CefPostDelayedTask(TID_RENDERER,
+                     base::Bind(&UpdateHandler::DoItemSearch, instance, NULL),
+                     DEFAULT_UPDATE_DELAY);
   return;
 }
 
@@ -155,8 +165,12 @@ void SimpleApp::OnContextInitialized() {
 #if defined(OS_WIN)
     // On Windows we need to specify certain flags that will be passed to
     // CreateWindowEx().
-    window_info.SetAsPopup(NULL, "tracker");
+    window_info.SetAsPopup(NULL, "TTC Tracker");
 #endif
+    // IMPORTANT(George): Set width and height after SetAsPopup as they are
+    // garbage since we called with a NULL HWND (windows)
+    window_info.width = 960;
+    window_info.height = 920;
 
     // Create the first browser window.
     CefBrowserHost::CreateBrowser(window_info, handler, url, browser_settings,

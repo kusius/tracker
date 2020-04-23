@@ -1,7 +1,24 @@
-assets/node_modules
-assets/dist
+# UI / node build ignores
+node_modules
+dist
+
+#VS ignores
 .vs
 build
 *.dir
 res
 *proj*
+*manifest
+
+#cmake ignores
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps

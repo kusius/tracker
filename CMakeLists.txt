@@ -11,14 +11,15 @@ project(tracker)
 
 # cefsimple sources.
 set(CEFSIMPLE_SRCS
+  datastore.cc
+  datastore.h
   v8_handler.h
   simple_app.cc
   simple_app.h
   simple_handler.cc
   simple_handler.h
-  datastore.cpp
-  datastore.h
-  #xmlparser.h
+  xmlparser.h
+  update_handler.h
   )
 set(CEFSIMPLE_SRCS_LINUX
   cefsimple_linux.cc
@@ -249,13 +250,14 @@ if(OS_WINDOWS)
   # Add the custom manifest files to the executable.
   ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}" "exe")
 
-  set(UI_RESOURCE_DIR D:/work/tracker/assets/material/dist)
+  set(UI_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets/dist")
   set(UI_RESOURCE_FILES
   app.html
   bundle.js
   bundle.css
   my.js
-  styles.css)
+  styles.css
+  content)
 
   # Copy binary and resource files to the target output directory.
   COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")

@@ -58,7 +58,7 @@ void SimpleHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
     }
   } else {
     // Set the title of the window using platform APIs.
-    PlatformTitleChange(browser, title);
+    // PlatformTitleChange(browser, title);
   }
 }
 

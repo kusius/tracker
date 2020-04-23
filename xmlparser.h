@@ -6,6 +6,39 @@
 
 typedef std::vector<GumboNode> NodeV;
 
+// trim from start (in place)
+static inline void ltrim(std::string& s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                                  [](int ch) { return !std::isspace(ch); }));
+}
+// trim from end (in place)
+static inline void rtrim(std::string& s) {
+  s.erase(std::find_if(s.rbegin(), s.rend(),
+                       [](int ch) { return !std::isspace(ch); })
+              .base(),
+          s.end());
+}
+// trim from start (copying)
+static inline std::string ltrim_copy(std::string s) {
+  ltrim(s);
+  return s;
+}
+// trim from end (copying)
+static inline std::string rtrim_copy(std::string s) {
+  rtrim(s);
+  return s;
+}
+// trim from both ends (in place)
+static inline void trim(std::string& s) {
+  ltrim(s);
+  rtrim(s);
+}
+// trim from both ends (copying)
+static inline std::string trim_copy(std::string s) {
+  trim(s);
+  return s;
+}
+
 GumboNode FindFirst(GumboNode* node,
                     GumboTag tag,
                     const char* attrib_name,
@@ -23,8 +56,10 @@ GumboNode FindFirst(GumboNode* node,
     if (attrib_name != nullptr) {
       attr_class =
           gumbo_get_attribute(&node->v.element.attributes, attrib_name);
-      if (strcmp(attrib_value, attr_class->value) == 0) {
-        // Found the results table
+      // Match only attribute or attribute and value if both are given
+      if (attr_class && (attrib_value == nullptr))
+        return (*node);
+      else if (attr_class && ((strcmp(attrib_value, attr_class->value) == 0))) {
         return (*node);
       }
     } else
@@ -61,7 +96,12 @@ std::vector<GumboNode> FindAll(GumboNode* node,
     if (attrib_name != nullptr) {
       attr_class =
           gumbo_get_attribute(&node->v.element.attributes, attrib_name);
-      if (strcmp(attrib_value, attr_class->value) == 0) {
+      // Match only attribute or attribute and value if both are given
+      if (attr_class && (attrib_value == nullptr)) {
+        results.push_back(*node);
+        return (results);
+      } else if (attr_class &&
+                 ((strcmp(attrib_value, attr_class->value) == 0))) {
         results.push_back(*node);
         return (results);
       }
@@ -97,7 +137,7 @@ std::string GetText(GumboNode* node) {
   GumboVector* head_children = &node->v.element.children;
   for (unsigned int i = 0; i < head_children->length; ++i) {
     GumboNode* child = static_cast<GumboNode*>(head_children->data[i]);
-    if (child->type == GUMBO_NODE_TEXT || GUMBO_NODE_WHITESPACE) {
+    if (child->type == GUMBO_NODE_TEXT) {
       return (std::string(child->v.text.text));
     }
   }
@@ -130,6 +170,55 @@ std::string KeepText(std::string source) {
   return (result);
 }
 
+void ParseItemDeals(std::string HTML, ItemDealVec* items) {
+  items->clear();
+  GumboOutput* output = gumbo_parse(HTML.c_str());
+  // Get html TABLE containing the results
+  GumboNode results_table = FindFirst(output->root, GUMBO_TAG_TABLE, "class",
+                                      "trade-list-table max-width");
+  NodeV all_rows =
+      FindAll(&results_table, GUMBO_TAG_TR, "class", "cursor-pointer");
+  if (all_rows.size() > 0) {
+    // The item name
+    ItemDeal item;
+    double price;
+    GumboNode item_row = all_rows[1];
+    NodeV item_columns = FindAll(&item_row, GUMBO_TAG_TD, nullptr, nullptr);
+    // Parse item name
+    GumboNode node =
+        FindFirst(&item_columns[0], GUMBO_TAG_DIV, nullptr, nullptr);
+    item.name = trim_copy(GetText(&node));
+    // Listings in the first page should be enough
+    for (unsigned int i = 0; i < all_rows.size(); i++) {
+      item_row = all_rows[i];
+      item_columns = FindAll(&item_row, GUMBO_TAG_TD, nullptr, nullptr);
+      // Price
+      node = item_columns[3];
+      price = ::atof(KeepNumber(GetText(&node)).c_str());
+      if (price < DataStore::GetItem(item.name).min_suggest) {
+        /* Location */
+        node = item_columns[2];
+        NodeV children = FindAll(&node, GUMBO_TAG_DIV, nullptr, nullptr);
+        if (children.size() > 0) {
+          item.location = trim_copy(GetText(&children[0]));
+          item.trader = trim_copy(GetText(&children[1]));
+
+          /* Time Last Seen */
+          node = item_columns[4];
+          GumboAttribute* time = gumbo_get_attribute(&node.v.element.attributes,
+                                                     "data-mins-elapsed");
+          item.mins_elapsed = ::atoi(time->value);
+        }
+
+        /* Time Last Seen */
+        item.price = price;
+        items->push_back(item);
+      }
+    }
+  }
+
+  return;
+}
 // Returns:
 // True if item exists (updated)
 // False if item does not exist (new)
@@ -157,7 +246,7 @@ bool ParseTTCPriceCheck(std::string HTML, PriceCheck* item) {
       // Parse item name
       GumboNode item_name_div =
           FindFirst(&all_data[0], GUMBO_TAG_DIV, nullptr, nullptr);
-      item->name = KeepText(GetText(&item_name_div));
+      item->name = trim_copy(GetText(&item_name_div));
 
       // Parse suggested prices to double
       NodeV suggestions =
@@ -171,9 +260,6 @@ bool ParseTTCPriceCheck(std::string HTML, PriceCheck* item) {
 
         item->min_suggest = ::atof(min_suggest.c_str());
         item->max_suggest = ::atof(max_suggest.c_str());
-
-        // Save the inner HTML of the item info
-        item->inner_html = GetInnerHTML(&all_data[0].v.element);
 
         // Find image src attribute path, append domain name and save
         GumboAttribute* attr_src;

@@ -2,7 +2,39 @@ html, body {
   display: flex;
   flex-direction: column;
   margin-top: 32px;
-  background-color: rgb(14, 13, 13);
+  /*background-color: rgb(14, 13, 13);*/
+}
+
+.container
+{
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-card__title {
+    margin-bottom: 0;
+}
+
+.demo-card__subtitle {
+    margin: 0;
+}
+
+.mdc-typography {
+    font-family: Nunito, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.mdc-typography--headline6 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: .0125em;
+}
+
+.mdc-typography--subtitle2 {
+    font-size: .875rem;
+    line-height: 1.375rem;
+    font-weight: 500;
+    letter-spacing: .0071428571em;
 }
 
 .mdc-data-table__row

@@ -14,23 +14,25 @@ class MyV8Handler : public CefV8Handler, public CefURLRequestClient {
   MyV8Handler() {}
 
   virtual void OnRequestComplete(CefRefPtr<CefURLRequest> request) OVERRIDE {
-    CefURLRequest::Status status = request->GetRequestStatus();
-    if (status == CefURLRequest::Status::UR_SUCCESS) {
+    CefRefPtr<CefResponse> response = request->GetResponse();
+    int status = response->GetStatus();
+
+    if (status == 200) {
       CefV8ValueList args;
       CefRefPtr<CefV8Value> retval;
-
-      CefRefPtr<CefResponse> response = request->GetResponse();
 
       // Parse TTC response HTML
       PriceCheck item;
       bool exists = ParseTTCPriceCheck(download_data_, &item);
 
       if (item.name.empty()) {
-        // item not found return undefined
+        // item not found, return undefined
         args.push_back(CefV8Value::CreateUndefined());
         callback_function_->ExecuteFunctionWithContext(callback_context_, NULL,
                                                        args);
       } else {
+        // item found, return item details and info on whether its a new
+        // item or an update of existing one.
         callback_context_->Enter();
         CefRefPtr<CefV8Value> ret = CefV8Value::CreateObject(NULL, NULL);
         ret->SetValue("exists", CefV8Value::CreateBool(exists),
@@ -48,13 +50,13 @@ class MyV8Handler : public CefV8Handler, public CefURLRequestClient {
         callback_function_->ExecuteFunctionWithContext(callback_context_, NULL,
                                                        args);
       }
-      // Send the item data to JS function
-      // We need to inform the UI on either one of 3 cases
-      // - Item found: New
-      // - Item found: Exists (updated)
-      // - Item not found
 
       download_data_.clear();
+    } else {
+      CefV8ValueList args;
+      args.push_back(CefV8Value::CreateString(download_data_));
+      callback_function_->ExecuteFunctionWithContext(callback_context_, NULL,
+                                                     args);
     }
   }
 
@@ -82,6 +84,7 @@ class MyV8Handler : public CefV8Handler, public CefURLRequestClient {
               "SearchResult?ItemID=&SearchType=PriceCheck&ItemNamePattern=" +
               value);
           request->SetMethod("GET");
+
           // Start the request. MyRequestClient callbacks will be executed
           // asynchronously.
           CefRefPtr<CefURLRequest> url_request =
@@ -97,7 +100,7 @@ class MyV8Handler : public CefV8Handler, public CefURLRequestClient {
         CefRefPtr<CefV8Value> arg = arguments[0];
         if ((arg.get()->IsValid() && arg.get()->IsString())) {
           std::string item_name = arg.get()->GetStringValue();
-          DataStore::items.erase(item_name);
+          DataStore::RemoveItem(item_name);
           return true;
         }
       }

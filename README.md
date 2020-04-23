@@ -10,3 +10,7 @@ It is a current work in progress intended to learn the workflow of the [CEF](htt
 - [NodeJS](https://nodejs.org/en/)
 - [Material Design Components](https://material.io/design)
 - [Gumbo Parser](https://github.com/google/gumbo-parser)
+
+
+## Screenshots
+![alt text](screenshots/demo_1.png "A screenshot of the app")

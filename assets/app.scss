@@ -1,11 +1,12 @@
-@use "@material/theme" with (
+/* @use "@material/theme";
+with (
   $primary: #aca76da6,
   $secondary: #e7dca7,
   $surface: #252424,
   $on-primary: #442b2d,
   $on-secondary: #442b2d,
   $background: #1d1d1d,
-);
+);*/
 
 @use "@material/typography" with (
   $font-family: unquote("Nunito, sans-serif")
@@ -18,6 +19,10 @@
 @use "@material/textfield/mdc-text-field";
 @use "@material/layout-grid/mdc-layout-grid";
 @use "@material/data-table/mdc-data-table";
-@use "@material/icon-button/mdc-icon-button"
+@use "@material/icon-button/mdc-icon-button";
+@use "@material/form-field/mdc-form-field";
+@use "@material/checkbox/mdc-checkbox";
+@use "@material/card/mdc-card";
+
 
 

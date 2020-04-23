@@ -1,13 +1,42 @@
 import { MDCMenu } from '@material/menu';
 import { MDCSnackbar } from '@material/snackbar';
 
+
+
+
+const minutes_treshold = 60;
 const menu = new MDCMenu(document.querySelector('.mdc-menu'));
 const snackbar = new MDCSnackbar(document.querySelector('.mdc-snackbar'));
 var last_row_menu;
 
+// Register this callback function for our C++ update handler to call when 
+// we have some new items to show the user
+window.register(Notify);
+
+export function Notify(item_list) {
+    if (item_list.length == 0)
+        console.log("Notify called with array of length: 0");
+    else {
+        var ulist = document.getElementById('notifylist');
+        // Get the list item template and fill it
+        var template = document.querySelector('#notifyitem');
+        for (var i = 0, item; item = item_list[i]; i++) {
+            if (item.mins_elapsed <= minutes_treshold) {
+                var textnode = document.createTextNode(item.price + ' - ' + item.mins_elapsed + ' minutes ago');
+                var clone = template.content.cloneNode(true);
+                clone.getElementById('itemname').innerText = item.name;
+                clone.getElementById('itemmeta').appendChild(textnode);
+                clone.getElementById('itemlocation').innerText = item.location + " - " + item.trader;
+                // Material styling
+                //Append the new list item to the list
+                ulist.appendChild(clone);
+            }
+        }
+    }
+}
+
 export function HandleSearch() {
     var item_name = document.getElementById('item-text-box').value;
-    //this is a C++ exposed function
     // C++ CEF implementation
     window.ttc_price_check(item_name, UpdateWatchList);
     return true;
