@@ -229,7 +229,7 @@ endif()
 
 if(OS_WINDOWS)
   #Gumbo HTML parser directory
-  set(GUMBO_ROOT "D:/gumbo-parser/")
+  set(GUMBO_ROOT "${CEF_ROOT}/../gumbo-parser/")
   set(GUMBO_INCLUDE_DIR "${GUMBO_ROOT}/src/")
   set(GUMBO_LIBRARY_DIR "${GUMBO_ROOT}/visualc/x64/Debug/")
   include_directories("${GUMBO_INCLUDE_DIR}")
