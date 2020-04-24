@@ -2,6 +2,7 @@
 #define CEF_MY_V8_HANDLER_
 
 #include <string>
+#include <thread>
 
 #include "datastore.h"
 #include "include/cef_urlrequest.h"
@@ -103,6 +104,42 @@ class MyV8Handler : public CefV8Handler, public CefURLRequestClient {
           DataStore::RemoveItem(item_name);
           return true;
         }
+      }
+    } else if (name == "ttc_find_deals") {
+      CefRefPtr<CefV8Value> func = arguments[0];
+
+      if (func.get()->IsValid() && func.get()->IsFunction()) {
+        DataStore* datastore = DataStore::getInstance();
+        std::map<std::string, PriceCheck> items = datastore->GetItemsSnapshot();
+        if (items.size() == 0) {
+          return true;
+        }
+
+        UpdateHandler* handler = new UpdateHandler(
+            CefV8Context::GetCurrentContext(), func, (int)items.size());
+
+        std::map<std::string, PriceCheck>::iterator it;
+        for (it = items.begin(); it != items.end(); it++) {
+          // Send a request for this item
+          std::string query;
+          CefRefPtr<CefRequest> request = CefRequest::Create();
+          query =
+              "https://eu.tamrieltradecentre.com/pc/Trade/"
+              "SearchResult?ItemID=&ItemNamePattern=" +
+              it->second.name + "&SortBy=Price&Order=asc&PriceMax=" +
+              std::to_string((int)(it->second.min_suggest) - 1);
+
+          request->SetURL(query);
+          request->SetMethod("GET");
+
+          CefRefPtr<CefURLRequest> url_request =
+              CefURLRequest::Create(request, handler, nullptr);
+        }
+
+        // execute DoItemSearch in a new thread
+        // std::thread t(&UpdateHandler::DoItemSearch, handler, NULL);
+        // t.join();
+        return true;
       }
     }
 

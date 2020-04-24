@@ -18,8 +18,9 @@ struct ItemDeal {
   std::string name;
   std::string location;
   std::string trader;
-  unsigned int mins_elapsed;
   double price;
+  unsigned int mins_elapsed;
+  unsigned int trade_id;
 };
 
 typedef std::vector<ItemDeal> ItemDealVec;

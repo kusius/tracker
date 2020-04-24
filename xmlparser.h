@@ -184,6 +184,7 @@ void ParseItemDeals(std::string HTML, ItemDealVec* items) {
     double price;
     GumboNode item_row = all_rows[1];
     NodeV item_columns = FindAll(&item_row, GUMBO_TAG_TD, nullptr, nullptr);
+
     // Parse item name
     GumboNode node =
         FindFirst(&item_columns[0], GUMBO_TAG_DIV, nullptr, nullptr);
@@ -191,6 +192,13 @@ void ParseItemDeals(std::string HTML, ItemDealVec* items) {
     // Listings in the first page should be enough
     for (unsigned int i = 0; i < all_rows.size(); i++) {
       item_row = all_rows[i];
+      // Parse trade id
+      std::string trade_id = gumbo_get_attribute(&item_row.v.element.attributes,
+                                                 "data-on-click-link")
+                                 ->value;
+
+      item.trade_id = ::atoi(KeepNumber(trade_id).c_str());
+
       item_columns = FindAll(&item_row, GUMBO_TAG_TD, nullptr, nullptr);
       // Price
       node = item_columns[3];

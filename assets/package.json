@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server",
-    "build": "webpack && copy /Y *.html dist\\ && copy /Y app.js dist\\ && copy /Y my.js dist\\ && copy /Y *.css dist\\"
+    "build": "webpack && copy /Y *.html dist\\ && copy /Y app.js dist\\ && copy /Y my.js dist\\ && copy /Y *.css dist\\ && copy /Y  dist\\* ..\\..\\build\\tracker\\Debug\\assets\\"
   },
   "author": "",
   "license": "ISC",

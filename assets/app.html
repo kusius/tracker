@@ -12,15 +12,17 @@
     <div class="mdc-layout-grid">
         <div class="mdc-layout-grid__inner">
             <div class="mdc-layout-grid__cell">
-                <form action="javascript:void(0);" onsubmit="return window.GlobalFuncs.HandleSearch();">
-                    <label class="mdc-text-field">
-                        <div class="mdc-text-field__ripple"></div>
-                        <input id="item-text-box" class="mdc-text-field__input" type="text"
-                            aria-labelledby="my-label-id">
-                        <span class="mdc-floating-label" id="my-label-id">Item Name</span>
-                        <div class="mdc-line-ripple"></div>
-                    </label>
-                </form>
+                <div>
+                    <form action="javascript:void(0);" onsubmit="return window.GlobalFuncs.HandleSearch();">
+                        <label class="mdc-text-field">
+                            <div class="mdc-text-field__ripple"></div>
+                            <input id="item-text-box" class="mdc-text-field__input" type="text"
+                                aria-labelledby="my-label-id">
+                            <span class="mdc-floating-label" id="my-label-id">Item Name</span>
+                            <div class="mdc-line-ripple"></div>
+                        </label>
+                    </form>
+                </div>
                 <div id="notifylist" class="container">
                 </div>
             </div>
@@ -83,7 +85,7 @@
         <!-- A template row for the watchlist-->
         <template id="itemrow">
             <tr class="mdc-data-table__row mdc-menu-surface--anchor"
-                onmousedown="return window.GlobalFuncs.menuhandle(event);">
+                onmousedown="return window.GlobalFuncs.MenuHandle(event);">
                 <td class="mdc-data-table__cell item_name">
                     <img>
                     <div></div>

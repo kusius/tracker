@@ -6,7 +6,7 @@
 # Source files.
 #
 project(tracker)
-
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 
 # cefsimple sources.

@@ -1,6 +1,9 @@
 # UI / node build ignores
 node_modules
-dist
+assets/dist/*
+!assets/dist/content/
+!assets/dist/content/icons/
+
 
 #VS ignores
 .vs

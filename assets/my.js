@@ -2,16 +2,30 @@ import { MDCMenu } from '@material/menu';
 import { MDCSnackbar } from '@material/snackbar';
 
 
+/*User-configured variables*/
+export var update_interval_ms = 1000 * 60; //(ms) how frequently do we poll TTC for deals
+export var minutes_treshold = 2 * 60; //(minutes) how many minutes until deal is considered 'old'
 
 
-const minutes_treshold = 60;
+/*Module state variables*/
 const menu = new MDCMenu(document.querySelector('.mdc-menu'));
 const snackbar = new MDCSnackbar(document.querySelector('.mdc-snackbar'));
-var last_row_menu;
 
-// Register this callback function for our C++ update handler to call when 
-// we have some new items to show the user
-window.register(Notify);
+var last_row_menu = -1;
+var intervalID = -1;
+var notification_map = new Map();
+
+window.onload = function () {
+    // code goes here
+    intervalID = setTimeout("window.GlobalFuncs.DoFindDeals();", update_interval_ms);
+};
+
+export function DoFindDeals() {
+    console.log('dofinddeals');
+    // C++ function
+    window.ttc_find_deals(Notify);
+    intervalID = setTimeout("window.GlobalFuncs.DoFindDeals();", update_interval_ms);
+}
 
 export function Notify(item_list) {
     if (item_list.length == 0)
@@ -21,15 +35,20 @@ export function Notify(item_list) {
         // Get the list item template and fill it
         var template = document.querySelector('#notifyitem');
         for (var i = 0, item; item = item_list[i]; i++) {
-            if (item.mins_elapsed <= minutes_treshold) {
+            if (notification_map.has(item.trade_id)) {
+                //TODO(George): update the time elapsed on already shown notification
+            }
+            else if (item.mins_elapsed <= minutes_treshold) {
+                //New notification
+
                 var textnode = document.createTextNode(item.price + ' - ' + item.mins_elapsed + ' minutes ago');
                 var clone = template.content.cloneNode(true);
                 clone.getElementById('itemname').innerText = item.name;
                 clone.getElementById('itemmeta').appendChild(textnode);
                 clone.getElementById('itemlocation').innerText = item.location + " - " + item.trader;
-                // Material styling
-                //Append the new list item to the list
+
                 ulist.appendChild(clone);
+                notification_map.set(item.trade_id, item.name);
             }
         }
     }
@@ -42,9 +61,9 @@ export function HandleSearch() {
     return true;
 }
 
-
-export function menuhandle(event) {
-    if (event.which == 3) {
+export function MenuHandle(event) {
+    // TODO(George): '3' is going to be left click if user has left-handed mouse....
+    if (event.which == 3)/*Right click*/ {
         var parent = event.currentTarget;
         //open menu in the cursor's current position
         menu.setAbsolutePosition(event.clientX, event.clientY);

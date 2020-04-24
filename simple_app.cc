@@ -85,6 +85,7 @@ class SimpleBrowserViewDelegate : public CefBrowserViewDelegate {
 }  // namespace
 
 SimpleApp::SimpleApp() {}
+
 // CefRenderProcessHandler implementation
 void SimpleApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                  CefRefPtr<CefFrame> frame,
@@ -104,16 +105,25 @@ void SimpleApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
 
   func = CefV8Value::CreateFunction("remove_watched_item", handler);
   object->SetValue("remove_watched_item", func, V8_PROPERTY_ATTRIBUTE_NONE);
+
+  func = CefV8Value::CreateFunction("ttc_find_deals", handler);
+  object->SetValue("ttc_find_deals", func, V8_PROPERTY_ATTRIBUTE_NONE);
+
+  CefRefPtr<CefFrame> m_frame = browser->GetMainFrame();
+  m_frame->ExecuteJavaScript(
+      "var intervalID = setInterval(window.GlobalFuncs.DoSearch(), "
+      "update_interval);",
+      m_frame->GetURL(), 0);
   // Register our search function to execute after a delay on the render thread
   // Repost ourselves for the next update
-  CefRefPtr<UpdateHandler> instance = new UpdateHandler();
-  func = CefV8Value::CreateFunction("register", instance);
-  object->SetValue("register", func, V8_PROPERTY_ATTRIBUTE_NONE);
+  // CefRefPtr<UpdateHandler> instance = new UpdateHandler();
+  // func = CefV8Value::CreateFunction("register", instance);
+  // object->SetValue("register", func, V8_PROPERTY_ATTRIBUTE_NONE);
 
   // CefRefPtr<CefV8Handler> instance = new UpdateHandler();
-  CefPostDelayedTask(TID_RENDERER,
-                     base::Bind(&UpdateHandler::DoItemSearch, instance, NULL),
-                     DEFAULT_UPDATE_DELAY);
+  // CefPostDelayedTask(TID_RENDERER,
+  //                 base::Bind(&UpdateHandler::DoItemSearch, instance, NULL),
+  //               DEFAULT_UPDATE_DELAY);
   return;
 }
 

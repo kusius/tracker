@@ -10,11 +10,17 @@
 #include "include/wrapper/cef_closure_task.h"
 #include "xmlparser.h"
 
-#define DEFAULT_UPDATE_DELAY 5000
-
 class UpdateHandler : public CefV8Handler, public CefURLRequestClient {
  public:
-  UpdateHandler() : pending_requests(0){};
+  UpdateHandler(CefRefPtr<CefV8Context> context,
+                CefRefPtr<CefV8Value> func,
+                int pending_requests)
+      : callback_context_(context),
+        callback_function_(func),
+        pending_requests(pending_requests) {
+    acuired_deals.clear();
+  };
+
   void SetCallbackContext(CefRefPtr<CefV8Context> context) {
     callback_context_ = context;
   }
@@ -22,61 +28,14 @@ class UpdateHandler : public CefV8Handler, public CefURLRequestClient {
     callback_function_ = func;
   }
 
-  // Go through the items in DataStore and search for listings
-  // that match our criteria.
-  void DoItemSearch(int a) {
-    acuired_deals.clear();
-    pending_requests = 0;
-
-    std::map<std::string, PriceCheck>::iterator it;
-    DataStore* datastore = DataStore::getInstance();
-    std::map<std::string, PriceCheck> items = datastore->GetItemsSnapshot();
-    if (items.size() == 0) {
-      CefPostDelayedTask(TID_RENDERER,
-                         base::Bind(&UpdateHandler::DoItemSearch, this, NULL),
-                         DEFAULT_UPDATE_DELAY);
-      return;
-    }
-
-    for (it = items.begin(); it != items.end(); it++) {
-      // Send a request for this item
-      std::string query;
-      CefRefPtr<CefRequest> request = CefRequest::Create();
-      query =
-          "https://eu.tamrieltradecentre.com/pc/Trade/"
-          "SearchResult?ItemID=&ItemNamePattern=" +
-          it->second.name + "&SortBy=Price&Order=asc&PriceMax=" +
-          std::to_string((int)(it->second.min_suggest) - 1);
-
-      request->SetURL(query);
-      request->SetMethod("GET");
-
-      CefRefPtr<CefURLRequest> url_request =
-          CefURLRequest::Create(request, this, nullptr);
-
-      m_.lock();
-      pending_requests++;
-      m_.unlock();
-    }
-
-    // Repost ourselves for the next update
-    // CefRefPtr<UpdateHandler> instance = new UpdateHandler();
-    // instance->SetCallbackContext(callback_context_);
-    // instance->SetCallbackFunction(callback_function_);
-
-    return;
-  }
-
   virtual void OnRequestComplete(CefRefPtr<CefURLRequest> request) OVERRIDE {
-    // add items to watch list and only do the JS call / re-register
-    // after all items have been received
-
     CefRefPtr<CefResponse> response = request->GetResponse();
     int status = response->GetStatus();
 
     if (status == 200) {
       ItemDealVec item_deals;
       ParseItemDeals(download_data_, &item_deals);
+      download_data_.clear();
 
       m_.lock();
       pending_requests--;
@@ -87,9 +46,6 @@ class UpdateHandler : public CefV8Handler, public CefURLRequestClient {
       if (pending_requests == 0) {
         SendDataToUI();
         pending_requests = -1;
-        CefPostDelayedTask(TID_RENDERER,
-                           base::Bind(&UpdateHandler::DoItemSearch, this, NULL),
-                           DEFAULT_UPDATE_DELAY);
       }
     }
   }
@@ -101,9 +57,7 @@ class UpdateHandler : public CefV8Handler, public CefURLRequestClient {
             << "Attempt to notify UI with non-zero pending requests!! Abort";
         return;
       }
-
       callback_context_->Enter();
-
       // return item list
       CefV8ValueList args;
       CefRefPtr<CefV8Value> ret =
@@ -124,6 +78,9 @@ class UpdateHandler : public CefV8Handler, public CefURLRequestClient {
                        V8_PROPERTY_ATTRIBUTE_NONE);
         item->SetValue("price",
                        CefV8Value::CreateDouble(acuired_deals[i].price),
+                       V8_PROPERTY_ATTRIBUTE_NONE);
+        item->SetValue("trade_id",
+                       CefV8Value::CreateUInt(acuired_deals[i].trade_id),
                        V8_PROPERTY_ATTRIBUTE_NONE);
         ret->SetValue(i, item);
       }

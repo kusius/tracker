@@ -64,7 +64,6 @@ void SimpleHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 
 void SimpleHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
   CEF_REQUIRE_UI_THREAD();
-
   // Add to the list of existing browsers.
   browser_list_.push_back(browser);
 }
